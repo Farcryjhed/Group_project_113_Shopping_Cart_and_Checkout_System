@@ -33,12 +33,15 @@ class CartModel {
         $stmt = $this->conn->prepare("SELECT cart_id FROM carts WHERE user_id = ?");
         $stmt->execute([$user_id]);
         $cart = $stmt->fetch(PDO::FETCH_ASSOC);
-
+    
         if (!$cart) {
-            // If no cart exists, create a new one
-            $stmt = $this->conn->prepare("INSERT INTO carts (user_id) VALUES (?)");
-            $stmt->execute([$user_id]);
-            return $this->conn->lastInsertId();
+            // Generate a unique cart_id (UUID)
+            $cart_id = uniqid('', true); // You can replace this with a better UUID generation method
+    
+            // Insert a new cart with the generated cart_id
+            $stmt = $this->conn->prepare("INSERT INTO carts (cart_id, user_id) VALUES (?, ?)");
+            $stmt->execute([$cart_id, $user_id]);
+            return $cart_id;
         }
         return $cart['cart_id'];
     }

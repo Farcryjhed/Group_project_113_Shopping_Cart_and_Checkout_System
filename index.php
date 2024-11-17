@@ -3,8 +3,10 @@ require 'vendor/autoload.php';
 require 'config/Database.php';
 require 'controller/CartController.php';
 require 'controller/UserController.php';
+require 'controller/CheckoutController.php';
 require 'core/Router.php';
 require 'core/AuthMiddleware.php';  
+
 
 use Dotenv\Dotenv;
 
@@ -18,6 +20,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 
 $cartController = new CartController();
 $userController = new UserController();
+$checkoutController = new CheckoutController();
 $router = new Router();
 
 // Routes without authorization
@@ -29,7 +32,7 @@ $router->addRoute('POST', '/api/login', fn($params, $data) =>
     $userController->login($data)
 );
 
-// Routes with authorization
+// Routes with authorization in Cart
 $router->addRoute('GET', '/api/cart', function($params, $data) use ($cartController) {
     $auth = AuthMiddleware::authorize();
     return $cartController->viewCart($auth->user_id);
@@ -54,6 +57,23 @@ $router->addRoute('DELETE', '/api/cart/delete', function($params, $data) use ($c
     $auth = AuthMiddleware::authorize();
     return $cartController->clearCart($auth->user_id);
 });
+
+// Routes with authorization in Checkout
+$router->addRoute('POST', '/api/checkout/initiate', function($params, $data) use ($checkoutController) {
+    $auth = AuthMiddleware::authorize();
+    return $checkoutController->initiateCheckout($auth->user_id, $data['cart_id'], $data['shipping_address']);
+});
+
+$router->addRoute('POST', '/api/checkout/discount', function($params, $data) use ($checkoutController) {
+    $auth = AuthMiddleware::authorize();
+    return $checkoutController->applyDiscount($data['checkout_id'], $data['discount_code']);
+});
+
+$router->addRoute('POST', '/api/checkout/payment', function($params, $data) use ($checkoutController) {
+    $auth = AuthMiddleware::authorize();
+    return $checkoutController->applyPayment($data['checkout_id'], $data['payment_method']);
+});
+
 
 $response = $router->handleRequest($path, $method, $data);
 header('Content-Type: application/json');
