@@ -59,6 +59,7 @@ $router->addRoute('DELETE', '/api/cart/delete', function($params, $data) use ($c
 });
 
 // Routes with authorization in Checkout
+
 $router->addRoute('POST', '/api/checkout/initiate', function($params, $data) use ($checkoutController) {
     $auth = AuthMiddleware::authorize();
     return $checkoutController->initiateCheckout($auth->user_id, $data['cart_id'], $data['shipping_address']);
@@ -72,6 +73,21 @@ $router->addRoute('POST', '/api/checkout/discount', function($params, $data) use
 $router->addRoute('POST', '/api/checkout/payment', function($params, $data) use ($checkoutController) {
     $auth = AuthMiddleware::authorize();
     return $checkoutController->applyPayment($data['checkout_id'], $data['payment_method']);
+});
+
+$router->addRoute('GET', '/api/checkout', function($params, $data) use ($checkoutController) {
+    $auth = AuthMiddleware::authorize();
+    return $checkoutController->getCheckoutDetails($auth->user_id);
+});
+
+$router->addRoute('POST', '/api/checkout/confirm', function($params, $data) use ($checkoutController) {
+    $auth = AuthMiddleware::authorize();
+    return $checkoutController->confirmCheckout($data['checkout_id']);
+});
+
+$router->addRoute('POST', '/api/checkout/cancel', function($params, $data) use ($checkoutController) {
+    $auth = AuthMiddleware::authorize();
+    return $checkoutController->cancelCheckout($data['checkout_id']);
 });
 
 
