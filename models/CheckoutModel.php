@@ -77,9 +77,58 @@ class CheckoutModel {
         }
     }
 
-  
     
+    public function getCheckoutByUserId($user_id) {
+        $query = "SELECT * FROM checkouts WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$user_id]);
+        $checkout = $stmt->fetch(PDO::FETCH_ASSOC);
     
+        if ($checkout) {
+            $cartItems = $this->getCartItems($checkout['cart_id']);
+            $checkout['items'] = $cartItems;
+            return $checkout;
+        }
     
+        return null;
+    }
+    
+    public function getCheckoutById($checkout_id) {
+        $query = "SELECT * FROM checkouts WHERE checkout_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$checkout_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    public function createOrderFromCheckout($checkout) {
+        $order_id = uniqid('', true);
+        $query = "INSERT INTO orders (order_id, total_amount, shipping_address, user_id) VALUES (?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([
+            $order_id,
+            $this->calculateTotalAmount($checkout['cart_id']),
+            $checkout['shipping_address'],
+            $checkout['user_id']
+        ]);
+    
+        return $order_id;
+    }
+    
+    private function calculateTotalAmount($cart_id) {
+        $items = $this->getCartItems($cart_id);
+        $total = 0;
+        foreach ($items as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+        return $total;
+    }
+    public function cancelCheckout($checkout_id) {
+        $query = "UPDATE checkouts SET status = 'cancelled' WHERE checkout_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$checkout_id]);
+
+        return $stmt->rowCount() > 0;  
+    }
+
 }
 ?>
