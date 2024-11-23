@@ -54,7 +54,7 @@ class UserModel {
             // Generate JWT token
             $key = $_ENV['JWT_SECRET'];  // Use the secret from .env
             $issued_at = time();
-            $expiration_time = $issued_at + 3600;  // 1 hour expiration time
+            $expiration_time = $issued_at + (2 * 24 * 60 * 60);   // 2 days expiration time
             $payload = [
                 'user_id' => $user['user_id'],
                 'email' => $user['email'],
