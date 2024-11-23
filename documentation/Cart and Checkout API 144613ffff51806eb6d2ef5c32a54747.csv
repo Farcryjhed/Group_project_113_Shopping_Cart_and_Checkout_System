@@ -1,0 +1,12 @@
+﻿Name,Validation,Status Code,Status
+View Cart,Verified,200,Done
+Add Item to Cart,Verified,200,Done
+Update Item Quantity,Verified,200,Done
+Delete Item in Cart,Verified,200,Done
+Delete Cart,Verified,200,Done
+Checkout Cart,Verified,200,Done
+Discount,Verified,200,Done
+Checkout Payment,Verified,200,Done
+Checkout Details,Verified,200,Done
+Checkout Cancel,Verified,200,Done
+"Checkout Confirm ",Verified,200,Done
